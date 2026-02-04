@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BarberFinance - Controle Financeiro</title>
+    <meta name="description" content="Sistema inteligente de controle financeiro para barbearias">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #f9fafb;
+            --dark: #1f2937;
+            --gray: #6b7280;
+            --border: #e5e7eb;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        body {
+            background-color: #f3f4f6;
+            color: var(--dark);
+            line-height: 1.5;
+        }
+        
+        .container {
+            max-width: 100%;
+            padding: 0 16px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            font-size: 1.8rem;
+        }
+        
+        .main-content {
+            padding: 20px 0;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--dark);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 8px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray);
+        }
+        
+        .income { color: var(--secondary); }
+        .expenses { color: var(--danger); }
+        .balance { color: var(--primary); }
+        
+        .filter-section {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        select, button {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: white;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        select:focus, button:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-success {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .btn-success:hover {
+            opacity: 0.9;
+        }
+        
+        .transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-radius: 12px;
+            background: white;
+            border: 1px solid var(--border);
+        }
+        
+        .transaction-info {
+            flex: 1;
+        }
+        
+        .transaction-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .transaction-date {
+            font-size: 0.875rem;
+            color: var(--gray);
+        }
+        
+        .transaction-amount {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .income-amount { color: var(--secondary); }
+        .expense-amount { color: var(--danger); }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+        
+        .chart-container {
+            height: 200px;
+            margin: 20px 0;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            gap: 5px;
+            padding-bottom: 25px;
+        }
+        
+        .chart-bar-wrapper {
+            flex: 1;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .chart-bar {
+            width: 100%;
+            background: var(--primary);
+            border-radius: 4px 4px 0 0;
+            transition: height 0.3s ease;
+        }
+        
+        .chart-label {
+            position: absolute;
+            bottom: -25px;
+            font-size: 0.7rem;
+            color: var(--gray);
+            white-space: nowrap;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 24px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 1rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .install-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--warning);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            display: none;
+            z-index: 99;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .install-btn.show {
+            display: block;
+        }
+        
+        @media (min-width: 768px) {
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-icon">✂️</span>
+                <span>BarberFinance</span>
+            </div>
+            <button id="addTransactionBtn" class="btn-success">+</button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="main-content">
+            <div class="filter-section">
+                <select id="monthFilter">
+                    <option value="">Todos os Meses</option>
+                    <option value="0">Janeiro</option>
+                    <option value="1">Fevereiro</option>
+                    <option value="2">Março</option>
+                    <option value="3">Abril</option>
+                    <option value="4">Maio</option>
+                    <option value="5">Junho</option>
+                    <option value="6">Julho</option>
+                    <option value="7">Agosto</option>
+                    <option value="8">Setembro</option>
+                    <option value="9">Outubro</option>
+                    <option value="10">Novembro</option>
+                    <option value="11">Dezembro</option>
+                </select>
+                <select id="yearFilter">
+                    <option value="">Todos os Anos</option>
+                </select>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Receitas</div>
+                    <div class="stat-value income" id="totalIncome">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Despesas</div>
+                    <div class="stat-value expenses" id="totalExpenses">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Saldo</div>
+                    <div class="stat-value balance" id="totalBalance">R$ 0,00</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title">Comparativo Mensal</h2>
+                <div class="chart-container" id="monthlyChart"></div>
+            </div>
+            
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h2 class="card-title">Transações</h2>
+                    <span id="transactionCount">0 transações</span>
+                </div>
+                <div class="transaction-list" id="transactionList">
+                    <div class="empty-state">
+                        <h3>Nenhuma transação encontrada</h3>
+                        <p>Adicione sua primeira transação para começar a controlar suas finanças.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="transactionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Nova Transação</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="transactionForm">
+                <div class="form-group">
+                    <label for="transactionType">Tipo</label>
+                    <select id="transactionType" required>
+                        <option value="income">Receita</option>
+                        <option value="expense">Despesa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="transactionName">Descrição</label>
+                    <input type="text" id="transactionName" placeholder="Ex: Corte de cabelo, Produtos..." required>
+                </div>
+                <div class="form-group">
+                    <label for="transactionAmount">Valor (R$)</label>
+                    <input type="number" id="transactionAmount" step="0.01" min="0" placeholder="0,00" required>
+                </div>
+                <div class="form-group">
+                    <label for="transactionDate">Data</label>
+                    <input type="date" id="transactionDate" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary" style="flex: 1;">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <button class="install-btn" id="installBtn">Instalar App</button>
+
+    <script>
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registrado!', reg))
+                    .catch(err => console.log('Erro ao registrar Service Worker:', err));
+            });
+        }
+
+        // Dados em memória (simulando armazenamento interno)
+        let transactions = JSON.parse(localStorage.getItem('barber_transactions')) || [];
+        let deferredPrompt;
+
+        // Elementos DOM
+        const monthFilter = document.getElementById('monthFilter');
+        const yearFilter = document.getElementById('yearFilter');
+        const transactionList = document.getElementById('transactionList');
+        const transactionCount = document.getElementById('transactionCount');
+        const totalIncomeEl = document.getElementById('totalIncome');
+        const totalExpensesEl = document.getElementById('totalExpenses');
+        const totalBalanceEl = document.getElementById('totalBalance');
+        const monthlyChart = document.getElementById('monthlyChart');
+        const transactionModal = document.getElementById('transactionModal');
+        const transactionForm = document.getElementById('transactionForm');
+        const addTransactionBtn = document.getElementById('addTransactionBtn');
+        const closeModal = document.querySelector('.close-modal');
+        const installBtn = document.getElementById('installBtn');
+
+        // Funções auxiliares
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+
+        function formatDate(dateString) {
+            // Ajustar para fuso horário local
+            const date = new Date(dateString + 'T12:00:00');
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        function getCurrentDate() {
+            const now = new Date();
+            return now.toISOString().split('T')[0];
+        }
+
+        // Preencher anos no filtro
+        function populateYears() {
+            const currentYear = new Date().getFullYear();
+            const years = new Set();
+            
+            transactions.forEach(transaction => {
+                const year = new Date(transaction.date + 'T12:00:00').getFullYear();
+                years.add(year);
+            });
+            
+            years.add(currentYear);
+            
+            // Salvar ano selecionado
+            const selectedYear = yearFilter.value;
+            
+            // Limpar opções existentes (exceto a primeira)
+            while (yearFilter.options.length > 1) {
+                yearFilter.remove(1);
+            }
+            
+            // Adicionar anos em ordem decrescente
+            Array.from(years).sort((a, b) => b - a).forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearFilter.appendChild(option);
+            });
+            
+            // Restaurar seleção
+            if (selectedYear) yearFilter.value = selectedYear;
+        }
+
+        // Filtrar transações
+        function filterTransactions() {
+            const selectedMonth = monthFilter.value;
+            const selectedYear = yearFilter.value;
+            
+            return transactions.filter(transaction => {
+                const transactionDate = new Date(transaction.date + 'T12:00:00');
+                const transactionMonth = transactionDate.getMonth();
+                const transactionYear = transactionDate.getFullYear();
+                
+                let matches = true;
+                
+                if (selectedMonth !== '') {
+                    matches = matches && (transactionMonth == selectedMonth);
+                }
+                
+                if (selectedYear !== '') {
+                    matches = matches && (transactionYear == selectedYear);
+                }
+                
+                return matches;
+            });
+        }
+
+        // Calcular estatísticas
+        function calculateStats(transList) {
+            let income = 0;
+            let expenses = 0;
+            
+            transList.forEach(transaction => {
+                if (transaction.type === 'income') {
+                    income += transaction.amount;
+                } else {
+                    expenses += transaction.amount;
+                }
+            });
+            
+            return {
+                income,
+                expenses,
+                balance: income - expenses
+            };
+        }
+
+        // Renderizar transações
+        function renderTransactions() {
+            const filteredTransactions = filterTransactions();
+            const stats = calculateStats(filteredTransactions);
+            
+            // Atualizar estatísticas
+            totalIncomeEl.textContent = formatCurrency(stats.income);
+            totalExpensesEl.textContent = formatCurrency(stats.expenses);
+            totalBalanceEl.textContent = formatCurrency(stats.balance);
+            
+            // Atualizar contagem
+            transactionCount.textContent = `${filteredTransactions.length} ${filteredTransactions.length === 1 ? 'transação' : 'transações'}`;
+            
+            // Renderizar lista de transações
+            if (filteredTransactions.length === 0) {
+                transactionList.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Nenhuma transação encontrada</h3>
+                        <p>Adicione sua primeira transação para começar a controlar suas finanças.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            transactionList.innerHTML = '';
+            filteredTransactions
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .forEach(transaction => {
+                    const amountClass = transaction.type === 'income' ? 'income-amount' : 'expense-amount';
+                    const amountPrefix = transaction.type === 'income' ? '+' : '-';
+                    
+                    const transactionItem = document.createElement('div');
+                    transactionItem.className = 'transaction-item';
+                    transactionItem.innerHTML = `
+                        <div class="transaction-info">
+                            <div class="transaction-name">${transaction.name}</div>
+                            <div class="transaction-date">${formatDate(transaction.date)}</div>
+                        </div>
+                        <div class="transaction-amount ${amountClass}">${amountPrefix}${formatCurrency(transaction.amount)}</div>
+                    `;
+                    transactionList.appendChild(transactionItem);
+                });
+        }
+
+        // Renderizar gráfico mensal
+        function renderMonthlyChart() {
+            const selectedYear = yearFilter.value || new Date().getFullYear();
+            const chartData = {};
+            
+            // Inicializar todos os meses com 0
+            for (let i = 0; i < 12; i++) {
+                chartData[i] = 0;
+            }
+            
+            // Calcular receitas líquidas por mês
+            transactions.forEach(transaction => {
+                const date = new Date(transaction.date + 'T12:00:00');
+                const month = date.getMonth();
+                const year = date.getFullYear();
+                
+                if (year == selectedYear) {
+                    const amount = transaction.type === 'income' ? transaction.amount : -transaction.amount;
+                    chartData[month] += amount;
+                }
+            });
+            
+            // Encontrar o valor máximo para escala
+            const values = Object.values(chartData).map(Math.abs);
+            const maxValue = values.length > 0 ? Math.max(...values, 1) : 1;
+            
+            // Limpar container do gráfico
+            monthlyChart.innerHTML = '';
+            
+            // Renderizar barras
+            const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            Object.entries(chartData).forEach(([month, value]) => {
+                const percentage = (Math.abs(value) / maxValue) * 100;
+                const height = Math.max(percentage, 5); // Mínimo de 5% para visibilidade
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'chart-bar-wrapper';
+                
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = `${height}%`;
+                bar.style.backgroundColor = value >= 0 ? 'var(--secondary)' : 'var(--danger)';
+                bar.title = `${value >= 0 ? 'Receita' : 'Despesa'}: ${formatCurrency(value)}`;
+                
+                const label = document.createElement('div');
+                label.className = 'chart-label';
+                label.textContent = monthNames[parseInt(month)];
+                
+                wrapper.appendChild(bar);
+                wrapper.appendChild(label);
+                monthlyChart.appendChild(wrapper);
+            });
+        }
+
+        // Salvar transações
+        function saveTransactions() {
+            localStorage.setItem('barber_transactions', JSON.stringify(transactions));
+            populateYears();
+            renderTransactions();
+            renderMonthlyChart();
+        }
+
+        // Event listeners
+        monthFilter.addEventListener('change', () => {
+            renderTransactions();
+        });
+        
+        yearFilter.addEventListener('change', () => {
+            renderTransactions();
+            renderMonthlyChart();
+        });
+        
+        addTransactionBtn.addEventListener('click', () => {
+            document.getElementById('transactionDate').value = getCurrentDate();
+            document.getElementById('transactionAmount').value = '';
+            document.getElementById('transactionName').value = '';
+            document.getElementById('transactionType').value = 'income';
+            transactionModal.classList.add('active');
+        });
+        
+        closeModal.addEventListener('click', () => {
+            transactionModal.classList.remove('active');
+        });
+        
+        transactionModal.addEventListener('click', (e) => {
+            if (e.target === transactionModal) {
+                transactionModal.classList.remove('active');
+            }
+        });
+        
+        transactionForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const transaction = {
+                id: Date.now(),
+                type: document.getElementById('transactionType').value,
+                name: document.getElementById('transactionName').value,
+                amount: parseFloat(document.getElementById('transactionAmount').value),
+                date: document.getElementById('transactionDate').value
+            };
+            
+            transactions.push(transaction);
+            saveTransactions();
+            transactionModal.classList.remove('active');
+            transactionForm.reset();
+        });
+        
+        // PWA - Install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.classList.add('show');
+        });
+        
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    installBtn.classList.remove('show');
+                }
+                deferredPrompt = null;
+            }
+        });
+        
+        // Inicialização
+        populateYears();
+        renderTransactions();
+        renderMonthlyChart();
+        
+        // Atualizar automaticamente quando a página é focada
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                renderTransactions();
+                renderMonthlyChart();
+            }
+        });
+    </script>
+</body>
+</html>
